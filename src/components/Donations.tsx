@@ -60,8 +60,8 @@ export default function Donations() {
               fetch(`${API_URL}/campaigns/active`)
                 .then(res => res.json())
                 .then(data => setCampaign(data));
-            } catch (err) {
-              alert('Verification failed');
+            } catch (err: any) {
+              alert('Verification failed: ' + (err.message || 'Unknown error'));
             }
           },
           prefill: {
