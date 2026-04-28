@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { fetchWithAuth } from '@/lib/api';
+import { fetchWithAuth, API_URL } from '@/lib/api';
 import Navbar from '@/components/Navbar';
 import { Clock, Award, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -33,7 +33,7 @@ export default function Profile() {
     try {
       const formData = new FormData();
       formData.append('image', file);
-      const uploadRes = await fetch('http://localhost:5000/api/upload', {
+      const uploadRes = await fetch(`${API_URL}/upload`, {
         method: 'POST',
         body: formData
       });

@@ -1,12 +1,13 @@
 'use client';
 import { Award, Star, Clock } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { API_URL } from '@/lib/api';
 
 export default function Community() {
   const [leaders, setLeaders] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/users/leaderboard')
+    fetch(`${API_URL}/users/leaderboard`)
       .then(res => res.json())
       .then(data => setLeaders(data))
       .catch(console.error);

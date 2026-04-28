@@ -1,7 +1,7 @@
 'use client';
 import { ShieldCheck, ArrowRight, Receipt, Image as ImageIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { fetchWithAuth } from '@/lib/api';
+import { fetchWithAuth, API_URL } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
@@ -12,7 +12,7 @@ export default function Donations() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/campaigns/active')
+    fetch(`${API_URL}/campaigns/active`)
       .then(res => res.json())
       .then(data => setCampaign(data))
       .catch(console.error);
@@ -57,7 +57,7 @@ export default function Donations() {
               });
               alert('Donation successful! Thank you for your contribution.');
               // Refresh campaign stats
-              fetch('http://localhost:5000/api/campaigns/active')
+              fetch(`${API_URL}/campaigns/active`)
                 .then(res => res.json())
                 .then(data => setCampaign(data));
             } catch (err) {

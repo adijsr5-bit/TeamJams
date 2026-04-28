@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { fetchWithAuth } from '@/lib/api';
+import { fetchWithAuth, API_URL } from '@/lib/api';
 import Navbar from '@/components/Navbar';
 import { useRouter } from 'next/navigation';
 
@@ -42,7 +42,7 @@ export default function AdminDashboard() {
       fetchWithAuth('/events').then(setEvents).catch(console.error);
       if (user.role === 'admin') {
         fetchWithAuth('/reports').then(setReports).catch(console.error);
-        fetch('http://localhost:5000/api/campaigns/active')
+        fetch(`${API_URL}/campaigns/active`)
           .then(res => res.json())
           .then(data => {
             setCampaign(data);
@@ -61,7 +61,7 @@ export default function AdminDashboard() {
       if (imageFile) {
         const formData = new FormData();
         formData.append('image', imageFile);
-        const uploadRes = await fetch('http://localhost:5000/api/upload', {
+        const uploadRes = await fetch(`${API_URL}/upload`, {
           method: 'POST',
           body: formData
         });
