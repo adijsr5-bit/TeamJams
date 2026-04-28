@@ -1,7 +1,7 @@
 'use client';
 import { Camera, MapPin, UploadCloud, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
-import { fetchWithAuth } from '@/lib/api';
+import { fetchWithAuth, API_URL } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
@@ -35,7 +35,7 @@ export default function Report() {
       if (imageFile) {
         const formData = new FormData();
         formData.append('image', imageFile);
-        const uploadRes = await fetch('http://localhost:5000/api/upload', {
+        const uploadRes = await fetch(`${API_URL}/upload`, {
           method: 'POST',
           body: formData
         });
