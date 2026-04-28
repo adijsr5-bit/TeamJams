@@ -10,8 +10,8 @@ export default function AdminDashboard() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'events' | 'reports' | 'campaigns'>('events');
-  const [events, setEvents] = useState([]);
-  const [reports, setReports] = useState([]);
+  const [events, setEvents] = useState<any[]>([]);
+  const [reports, setReports] = useState<any[]>([]);
   
   // Campaign State
   const [campaign, setCampaign] = useState<any>(null);
