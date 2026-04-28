@@ -18,6 +18,31 @@ export default function Donations() {
       .catch(console.error);
   }, []);
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !campaign?._id) return;
+    
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const uploadRes = await fetch(`${API_URL}/upload`, { method: 'POST', body: formData });
+      const uploadData = await uploadRes.json();
+      
+      if (uploadData.imageUrl) {
+        const updatedGallery = [...(campaign.galleryImages || []), { url: uploadData.imageUrl, label: 'Impact' }];
+        const updated = await fetchWithAuth(`/campaigns/${campaign._id}`, {
+          method: 'PUT',
+          body: JSON.stringify({ ...campaign, galleryImages: updatedGallery })
+        });
+        setCampaign(updated);
+        alert('Image uploaded successfully!');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Error uploading image');
+    }
+  };
+
   const handleDonate = async () => {
     if (!user) {
       router.push('/login');
@@ -153,14 +178,14 @@ export default function Donations() {
                   { item: 'Refreshments for Volunteers', amount: '₹3,200', date: 'Oct 18' },
                   { item: 'Waste Transport Truck Hire', amount: '₹10,500', date: 'Oct 20' }
                 ].map((expense, idx) => (
-                  <div key={idx} className="flex justify-between items-center p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                    <div>
-                      <p className="text-brand-light font-medium">{expense.item}</p>
+                  <div key={idx} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-brand-light font-medium truncate whitespace-normal sm:whitespace-nowrap">{expense.item}</p>
                       <p className="text-sm text-brand-muted">{expense.date}</p>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
                       <span className="font-bold text-brand-light">{expense.amount}</span>
-                      <button className="text-brand-green text-sm hover:underline flex items-center gap-1">
+                      <button className="text-brand-green text-sm hover:underline flex items-center gap-1 whitespace-nowrap">
                         Receipt <ArrowRight className="w-3 h-3" />
                       </button>
                     </div>
@@ -173,28 +198,32 @@ export default function Donations() {
           {/* Proof Gallery */}
           <div className="lg:col-span-4 flex flex-col gap-6">
             <div className="glass-panel rounded-3xl p-6 border border-white/10 flex-1">
-              <h4 className="text-lg font-semibold text-brand-light flex items-center gap-2 mb-6">
-                <ImageIcon className="w-5 h-5 text-brand-muted" /> Verified Impact Proof
-              </h4>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="aspect-square rounded-xl bg-brand-dark overflow-hidden relative group">
-                    <img src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?q=80&w=400&auto=format&fit=crop" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Before" />
-                    <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-brand-accent">BEFORE</div>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="aspect-square rounded-xl bg-brand-dark overflow-hidden relative group">
-                    <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=400&auto=format&fit=crop" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="After" />
-                    <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-brand-green">AFTER</div>
-                  </div>
-                </div>
+              <div className="flex justify-between items-center mb-6">
+                <h4 className="text-lg font-semibold text-brand-light flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5 text-brand-muted" /> Verified Impact Proof
+                </h4>
+                {user?.role?.toLowerCase() === 'admin' && (
+                  <label className="bg-brand-green/20 hover:bg-brand-green/30 text-brand-green px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-colors border border-brand-green/30">
+                    + Add Image
+                    <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                  </label>
+                )}
               </div>
-              <div className="mt-4 aspect-video rounded-xl bg-brand-dark overflow-hidden relative group">
-                <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=600&auto=format&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Volunteers" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
-                  <span className="text-sm font-medium text-white">45 Volunteers • Oct 21</span>
-                </div>
+              <div className="grid grid-cols-2 gap-4">
+                {campaign?.galleryImages?.length > 0 ? (
+                  campaign.galleryImages.map((img: any, idx: number) => (
+                    <div key={idx} className={`space-y-2 ${idx === 2 ? 'col-span-2' : ''}`}>
+                      <div className={`rounded-xl bg-brand-dark overflow-hidden relative group ${idx === 2 ? 'aspect-video' : 'aspect-square'}`}>
+                        <img src={img.url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={img.label || 'Impact'} />
+                        <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-white uppercase">{img.label || 'IMPACT'}</div>
+                      </div>
+                    </div>
+                  )).slice(0, 3)
+                ) : (
+                  <div className="col-span-2 text-center py-10 text-brand-muted text-sm border border-dashed border-white/10 rounded-xl">
+                    Impact photos will appear here once uploaded by Admin.
+                  </div>
+                )}
               </div>
               <button className="w-full mt-6 py-3 rounded-xl border border-white/10 hover:bg-white/5 text-brand-light transition-colors text-sm font-medium">
                 View Full Gallery

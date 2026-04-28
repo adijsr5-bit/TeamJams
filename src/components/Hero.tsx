@@ -1,10 +1,21 @@
 'use client';
 
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { ArrowRight, MapPin } from 'lucide-react';
+import { API_URL } from '@/lib/api';
 
 export default function Hero() {
+  const [stats, setStats] = useState<{ totalUsers: number, avatars: string[] }>({ totalUsers: 2400, avatars: [] });
+
+  useEffect(() => {
+    fetch(`${API_URL}/stats`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.totalUsers) setStats(data);
+      })
+      .catch(console.error);
+  }, []);
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -81,14 +92,14 @@ export default function Hero() {
           
           <div className="flex items-center gap-4 text-brand-muted">
             <div className="flex -space-x-3">
-              {[1, 2, 3, 4].map((i) => (
+              {(stats.avatars.length > 0 ? stats.avatars : ['Rohan', 'Priya', 'Amit', 'Sneha'].map(name => `https://ui-avatars.com/api/?name=${name}&background=10b981&color=fff`)).map((img, i) => (
                 <div key={i} className="w-10 h-10 rounded-full border-2 border-brand-dark bg-brand-slate overflow-hidden">
-                  <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="Volunteer" className="w-full h-full object-cover" />
+                  <img src={img} alt="Volunteer" className="w-full h-full object-cover" />
                 </div>
               ))}
             </div>
             <div className="text-sm font-medium">
-              <span className="text-brand-light block font-bold">2,400+</span>
+              <span className="text-brand-light block font-bold">{stats.totalUsers > 2400 ? stats.totalUsers : `${stats.totalUsers}+`}</span>
               volunteers active
             </div>
           </div>

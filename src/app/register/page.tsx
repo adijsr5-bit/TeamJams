@@ -9,6 +9,7 @@ export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -21,7 +22,7 @@ export default function Register() {
     try {
       const data = await fetchWithAuth('/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ name, email, password })
+        body: JSON.stringify({ name, email, password, phoneNumber })
       });
       
       login({
@@ -86,6 +87,19 @@ export default function Register() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-brand-light focus:outline-none focus:border-brand-green/50 transition-colors"
+              required
+            />
+          </div>
+
+
+          <div>
+            <label className="block text-sm font-medium text-brand-muted mb-2">Phone Number</label>
+            <input 
+              type="tel" 
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-brand-light focus:outline-none focus:border-brand-green/50 transition-colors"
+              placeholder="+91..."
               required
             />
           </div>

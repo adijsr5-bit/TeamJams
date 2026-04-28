@@ -1,5 +1,6 @@
 'use client';
 import { Award, Star, Clock } from 'lucide-react';
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { API_URL } from '@/lib/api';
 
@@ -103,9 +104,9 @@ export default function Community() {
               Complete your first 3 cleanup drives to unlock an officially verified volunteer certificate from our partner NGOs.
             </p>
           </div>
-          <button className="bg-brand-light hover:bg-white text-brand-dark px-8 py-4 rounded-xl font-bold transition-all whitespace-nowrap">
+          <Link href="/profile" className="bg-brand-light hover:bg-white text-brand-dark px-8 py-4 rounded-xl font-bold transition-all whitespace-nowrap text-center">
             View My Profile
-          </button>
+          </Link>
         </div>
       </div>
     </section>

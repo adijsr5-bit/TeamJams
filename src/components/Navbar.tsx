@@ -36,7 +36,7 @@ export default function Navbar() {
               <Link href="/profile" className="text-sm font-medium text-brand-light hover:text-brand-green transition-colors">
                 {user.name}
               </Link>
-              {(user.role === 'admin' || user.role === 'ngo') && (
+              {(user.role?.toLowerCase() === 'admin' || user.role?.toLowerCase() === 'ngo') && (
                 <Link href="/admin" className="text-sm font-medium text-brand-accent hover:text-brand-light transition-colors">
                   Admin
                 </Link>
@@ -76,7 +76,7 @@ export default function Navbar() {
                 <Link href="/profile" onClick={toggleMenu} className="text-brand-green font-medium py-2">
                   My Profile ({user.name})
                 </Link>
-                {(user.role === 'admin' || user.role === 'ngo') && (
+                {(user.role?.toLowerCase() === 'admin' || user.role?.toLowerCase() === 'ngo') && (
                   <Link href="/admin" onClick={toggleMenu} className="text-brand-accent font-medium py-2">
                     Admin Dashboard
                   </Link>

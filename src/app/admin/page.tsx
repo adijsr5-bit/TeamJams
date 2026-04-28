@@ -30,17 +30,18 @@ export default function AdminDashboard() {
   const [location, setLocation] = useState('');
   const [volunteersRequired, setVolunteersRequired] = useState(100);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [campaignImageFile, setCampaignImageFile] = useState<File | null>(null);
 
   useEffect(() => {
-    if (!isLoading && (!user || (user.role !== 'admin' && user.role !== 'ngo'))) {
+    if (!isLoading && (!user || (user.role?.toLowerCase() !== 'admin' && user.role?.toLowerCase() !== 'ngo'))) {
       router.push('/profile');
     }
   }, [user, isLoading, router]);
 
   useEffect(() => {
-    if (user && (user.role === 'admin' || user.role === 'ngo')) {
+    if (user && (user.role?.toLowerCase() === 'admin' || user.role?.toLowerCase() === 'ngo')) {
       fetchWithAuth('/events').then(setEvents).catch(console.error);
-      if (user.role === 'admin') {
+      if (user.role?.toLowerCase() === 'admin') {
         fetchWithAuth('/reports').then(setReports).catch(console.error);
         fetch(`${API_URL}/campaigns/active`)
           .then(res => res.json())
@@ -129,14 +130,40 @@ export default function AdminDashboard() {
     e.preventDefault();
     if (!campaign?._id) return;
     try {
+      let currentGallery = campaign.galleryImages || [];
+      if (campaignImageFile) {
+        const formData = new FormData();
+        formData.append('image', campaignImageFile);
+        const uploadRes = await fetch(`${API_URL}/upload`, { method: 'POST', body: formData });
+        const uploadData = await uploadRes.json();
+        if (uploadData.imageUrl) {
+          currentGallery = [...currentGallery, { url: uploadData.imageUrl, label: 'Impact Proof' }];
+        }
+      }
+      
       const updated = await fetchWithAuth(`/campaigns/${campaign._id}`, {
         method: 'PUT',
-        body: JSON.stringify({ title: campaignTitle, goal: campaignGoal, spent: campaignSpent })
+        body: JSON.stringify({ title: campaignTitle, goal: campaignGoal, spent: campaignSpent, galleryImages: currentGallery })
       });
       setCampaign(updated);
+      setCampaignImageFile(null);
       alert('Campaign updated successfully!');
     } catch (err: any) {
       alert(err.message || 'Error updating campaign');
+    }
+  };
+
+  const handleDeleteCampaignImage = async (imgUrl: string) => {
+    if (!campaign?._id || !confirm('Delete this image?')) return;
+    try {
+      const currentGallery = campaign.galleryImages.filter((img: any) => img.url !== imgUrl);
+      const updated = await fetchWithAuth(`/campaigns/${campaign._id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ ...campaign, galleryImages: currentGallery })
+      });
+      setCampaign(updated);
+    } catch (err: any) {
+      alert(err.message || 'Error deleting image');
     }
   };
 
@@ -176,7 +203,7 @@ export default function AdminDashboard() {
           >
             Manage Events
           </button>
-          {user.role === 'admin' && (
+          {user.role?.toLowerCase() === 'admin' && (
             <>
               <button 
                 onClick={() => setActiveTab('reports')}
@@ -194,7 +221,7 @@ export default function AdminDashboard() {
           )}
         </div>
 
-        {activeTab === 'campaigns' && user.role === 'admin' && (
+        {activeTab === 'campaigns' && user.role?.toLowerCase() === 'admin' && (
           <div className="glass-panel rounded-3xl p-8 border border-white/10 max-w-2xl">
             <h2 className="text-xl font-bold text-brand-light mb-6">Manage Donation Campaign</h2>
             <form onSubmit={handleUpdateCampaign} className="space-y-4">
@@ -210,6 +237,25 @@ export default function AdminDashboard() {
                 <label className="block text-sm font-medium text-brand-muted mb-2">Spent Amount (₹)</label>
                 <input type="number" value={campaignSpent} onChange={e => setCampaignSpent(Number(e.target.value))} required className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-brand-light focus:border-brand-green/50 outline-none" />
               </div>
+              
+              <div className="pt-4 border-t border-white/10">
+                <label className="block text-sm font-medium text-brand-muted mb-2">Add Impact Image</label>
+                <input type="file" accept="image/*" onChange={e => setCampaignImageFile(e.target.files?.[0] || null)} className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-brand-light focus:border-brand-green/50 outline-none" />
+              </div>
+
+              {campaign?.galleryImages?.length > 0 && (
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  {campaign.galleryImages.map((img: any, idx: number) => (
+                    <div key={idx} className="relative aspect-video rounded-xl overflow-hidden bg-brand-dark/50 group">
+                      <img src={img.url} alt="Campaign" className="w-full h-full object-cover" />
+                      <button type="button" onClick={() => handleDeleteCampaignImage(img.url)} className="absolute inset-0 bg-red-500/80 flex items-center justify-center text-white font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <button type="submit" className="w-full bg-brand-green text-white py-3 rounded-xl font-bold mt-4">Save Changes</button>
             </form>
           </div>

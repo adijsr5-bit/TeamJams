@@ -74,7 +74,7 @@ export default function Profile() {
           <div>
             <h1 className="text-3xl font-bold text-brand-light">{user.name}</h1>
             <p className="text-brand-muted">{user.email} • {user.role.toUpperCase()}</p>
-            {user.role === 'admin' && (
+            {user.role?.toLowerCase() === 'admin' && (
               <button 
                 onClick={() => router.push('/admin')}
                 className="mt-4 bg-brand-accent/10 text-brand-accent px-4 py-2 rounded-lg border border-brand-accent/20 font-medium text-sm hover:bg-brand-accent/20 transition-colors flex items-center gap-2"
